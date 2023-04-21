@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:grv="clr-namespace:GestureRecognizerView.MAUI;assembly=GestureRecognizerView.MAUI"
+             x:Class="GestureRecognizerView.MAUI.Test.MainPage" x:Name="mainPage">
+
+    <Grid>
+        <VerticalStackLayout
+            Spacing="25"
+            Padding="30,0"
+            VerticalOptions="Center" Background="yellow">
+            <Border WidthRequest="300" HeightRequest="300">
+                <Grid Background="blue">
+                    <Image x:Name="img" HorizontalOptions="Fill" VerticalOptions="Fill" Aspect="AspectFit" Source="dotnet_bot.png" />
+                    <grv:GestureRecognizerView x:Name="recognizerView" HorizontalOptions="Fill" VerticalOptions="Fill" />
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+    </Grid>
+
+</ContentPage>

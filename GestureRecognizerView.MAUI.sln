@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestureRecognizerView.MAUI", "GestureRecognizerView.MAUI\GestureRecognizerView.MAUI.csproj", "{3953E7B5-8565-4F7D-929B-88BBED94787C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestureRecognizerView.MAUI.Test", "GestureRecognizerView.MAUI.Test\GestureRecognizerView.MAUI.Test.csproj", "{3E7965B2-2B20-4735-802B-15E876299AD2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3953E7B5-8565-4F7D-929B-88BBED94787C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3953E7B5-8565-4F7D-929B-88BBED94787C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3953E7B5-8565-4F7D-929B-88BBED94787C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3953E7B5-8565-4F7D-929B-88BBED94787C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E7965B2-2B20-4735-802B-15E876299AD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E7965B2-2B20-4735-802B-15E876299AD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E7965B2-2B20-4735-802B-15E876299AD2}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{3E7965B2-2B20-4735-802B-15E876299AD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E7965B2-2B20-4735-802B-15E876299AD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E7965B2-2B20-4735-802B-15E876299AD2}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {76CB47E4-88E0-4269-9991-1F958A6DD1FC}
+	EndGlobalSection
+EndGlobal
