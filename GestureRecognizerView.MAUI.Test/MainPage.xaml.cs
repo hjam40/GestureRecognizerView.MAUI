@@ -1,18 +1,43 @@
 ﻿using System.Diagnostics;
+using System.Numerics;
 
 namespace GestureRecognizerView.MAUI.Test
 {
     public partial class MainPage : ContentPage
     {
-        double initX, initY, initScale = 0;
+        double initX = 0, initY = 0, initScale = 0, initRotation = 0;
         DateTime lastTap = DateTime.MinValue;
+        private GestureRecognizerView gestureRecognizer;
+        public GestureRecognizerView GestureRecognizer
+        {
+            get => gestureRecognizer;
+            set
+            {
+                gestureRecognizer = value;
+                if (gestureRecognizer != null)
+                {
+                    gestureRecognizer.TapGestureListener += RecognizerView_TapGestureListener;
+                    gestureRecognizer.PointerGestureListener += RecognizerView_PointerGestureListener;
+                    gestureRecognizer.PanGestureListener += RecognizerView_PanGestureListener;
+                    gestureRecognizer.PinchGestureListener += RecognizerView_PinchGestureListener;
+                    gestureRecognizer.MouseListener += RecognizerView_MouseListener;
+                }
+            }
+        }
         public MainPage()
         {
             InitializeComponent();
-            recognizerView.TapGestureListener += RecognizerView_TapGestureListener;
-            recognizerView.PointerGestureListener += RecognizerView_PointerGestureListener;
-            recognizerView.PanGestureListener += RecognizerView_PanGestureListener;
-            recognizerView.PinchGestureListener += RecognizerView_PinchGestureListener;
+        }
+        private void RecognizerView_MouseListener(object sender, MouseEventArgs args)
+        {
+            if (args.Status == MouseRecognizerStatus.WheelMoved)
+            {
+                if (args.MouseWheelDelta < 0)
+                    img.Scale -= 0.05;
+                else if (args.MouseWheelDelta > 0)
+                    img.Scale += 0.05;
+            }
+            //Debug.WriteLine($"Mouse status={args.Status} X={args.X} Y={args.Y} WheelDelta={args.MouseWheelDelta} LeftPressed={args.IsLeftButtonPressed} RightPressed={args.IsRightButtonPressed}");
         }
 
         private void RecognizerView_PinchGestureListener(object sender, PinchGestureEventArgs args)
@@ -21,25 +46,28 @@ namespace GestureRecognizerView.MAUI.Test
             {
                 case GestureRecognizerStatus.Started:
                     initScale = img.Scale;
+                    initRotation = img.Rotation;
                     break;
                 case GestureRecognizerStatus.Running:
                     img.Scale += args.ScaleIncrement;
+                    img.Rotation += args.RotationIncrement;
                     break;
                 case GestureRecognizerStatus.Complete:
                     img.Scale += args.ScaleIncrement;
-                    initScale = img.Scale;
+                    img.Rotation += args.RotationIncrement;
                     break;
                 case GestureRecognizerStatus.Cancel:
                     img.Scale = initScale;
+                    img.Rotation = initRotation;
                     break;
             }
-            Debug.WriteLine($"Pinch status={args.Status} Scale={args.Scale} ScaleIncrement={args.ScaleIncrement}");
+            //Debug.WriteLine($"Pinch status={args.Status} Scale={args.Scale} ScaleIncrement={args.ScaleIncrement}");
         }
 
         private void RecognizerView_PanGestureListener(object sender, PanGestureEventArgs args)
         {
-            if (args.Status != GestureRecognizerStatus.Running)
-                Debug.WriteLine($"Pan status={args.Status} TotalX={args.TotalX} TotalY={args.TotalY} IncX={args.IncX} IncY={args.IncY}");
+            //if (args.Status != GestureRecognizerStatus.Running)
+            //    Debug.WriteLine($"Pan status={args.Status} TotalX={args.TotalX} TotalY={args.TotalY} IncX={args.IncX} IncY={args.IncY}");
             switch(args.Status)
             {
                 case GestureRecognizerStatus.Started:
@@ -65,8 +93,8 @@ namespace GestureRecognizerView.MAUI.Test
 
         private void RecognizerView_PointerGestureListener(object sender, PointerGestureEventArgs args)
         {
-            if (args.Status != PointerRecognizerStatus.Move)
-                Debug.WriteLine($"Pointer status={args.Status} X={args.X} Y={args.Y} Pressed={args.Pressed}");
+            //if (args.Status != PointerRecognizerStatus.Move)
+            //    Debug.WriteLine($"Pointer status={args.Status} X={args.X} Y={args.Y} Pressed={args.Pressed}");
         }
 
         private void RecognizerView_TapGestureListener(object sender, TapGestureEventArgs args)
@@ -77,10 +105,11 @@ namespace GestureRecognizerView.MAUI.Test
                 {
                     img.TranslationX = img.TranslationY = 0;
                     img.Scale = 1;
+                    img.Rotation = 0;
                 }
                 lastTap = DateTime.Now;
             }
-            Debug.WriteLine($"Tap status={args.Status} X={args.X} Y={args.Y}");
+            //Debug.WriteLine($"Tap status={args.Status} X={args.X} Y={args.Y} Pressure={args.Pressure}");
         }
     }
 }

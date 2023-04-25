@@ -4,34 +4,57 @@ namespace GestureRecognizerView.MAUI;
 
 public class GestureRecognizerView : View
 {
-    public static readonly BindableProperty SelfProperty = BindableProperty.Create(nameof(Self), typeof(GestureRecognizerView), typeof(GestureRecognizerView), null);
+    public static readonly BindableProperty SelfProperty = BindableProperty.Create(nameof(Self), typeof(GestureRecognizerView), typeof(GestureRecognizerView), null, BindingMode.OneWayToSource);
 
-    public List<PointerInfo> ActivePointers { get; private set; } = new List<PointerInfo>();
+    private List<PointerInfo> ActivePointers { get; set; } = new List<PointerInfo>();
     /// <summary>
     /// Binding property for use this control in MVVM.
     /// </summary>
     public GestureRecognizerView Self
     {
         get { return (GestureRecognizerView)GetValue(SelfProperty); }
-        set { SetValue(SelfProperty, value); }
+        set {  SetValue(SelfProperty, value); }
     }
     public delegate void TapGestureHandler(object sender, TapGestureEventArgs args);
+    /// <summary>
+    /// Listener for manage Tap Gestures.
+    /// </summary>
     public event TapGestureHandler TapGestureListener;
     public delegate void PanGestureHandler(object sender, PanGestureEventArgs args);
+    /// <summary>
+    /// Listener for manage Pan Gestures.
+    /// </summary>
     public event PanGestureHandler PanGestureListener;
     public delegate void PinchGestureHandler(object sender, PinchGestureEventArgs args);
+    /// <summary>
+    /// Listener for manage Pinch Gestures.
+    /// </summary>
     public event PinchGestureHandler PinchGestureListener;
     public delegate void PointerGestureHandler(object sender, PointerGestureEventArgs args);
+    /// <summary>
+    /// Listener for manage all pointers actions over the view.
+    /// </summary>
     public event PointerGestureHandler PointerGestureListener;
+    public delegate void MouseHandler(object sender, MouseEventArgs args);
+    /// <summary>
+    /// Listener for manage mouse actions.
+    /// </summary>
+    public event MouseHandler MouseListener;
     private bool tapping = false;
     private bool panning = false;
     private bool pinching = false;
     private double panTotalX = 0, panTotalY = 0;
     private Point panEndPoint = new(-100, -100);
+    private double totalRotation = 0;
 
     public GestureRecognizerView()
     {
         Background = Brush.Transparent;
+    }
+
+    protected override void OnHandlerChanged()
+    {
+        base.OnHandlerChanged();
         Self = this;
     }
     internal void UpdateGestures(PointerInfo pointer)
@@ -43,28 +66,46 @@ public class GestureRecognizerView : View
             p.EndTime = pointer.StartTime;
             p.PreviewsPoint = p.EndPoint;
             p.EndPoint = pointer.StartPoint;
+            p.EndPressure = pointer.StartPressure;
             p.State1 = p.State2;
             p.State2 = pointer.State1;
+            p.MouseWheelDelta = pointer.MouseWheelDelta;
+            p.IsHorizontalMouseWheel = pointer.IsHorizontalMouseWheel;
+            p.IsLeftButtonPressed = pointer.IsLeftButtonPressed;
+            p.IsRightButtonPressed = pointer.IsRightButtonPressed;
+            p.IsMiddleButtonPressed = pointer.IsMiddleButtonPressed;
         }
         else
         {
             p = pointer;
             p.EndTime = p.PreviewsTime = p.StartTime;
             p.EndPoint = p.PreviewsPoint = p.StartPoint;
+            p.EndPressure = p.PreviewsPressure = p.StartPressure;
             p.State2 = p.State1;
             ActivePointers.Add(p);
         }
         PointerGestureEventArgs pargs = new() { Pointer = p };
         TapGestureEventArgs targs = new() { Pointer = p };
+        MouseEventArgs mouseargs = new() { Pointer = p };
         switch (pointer.State1)
         {
             case GestureType.Enter:
                 pargs.Status = PointerRecognizerStatus.Enter;
                 PointerGestureListener?.Invoke(this, pargs);
+                if (p.PointerType == PointerType.Mouse)
+                {
+                    mouseargs.Status = MouseRecognizerStatus.Enter;
+                    MouseListener?.Invoke(this, mouseargs);
+                }
                 break;
             case GestureType.Exit:
                 pargs.Status = PointerRecognizerStatus.Exit;
                 PointerGestureListener?.Invoke(this, pargs);
+                if (p.PointerType == PointerType.Mouse)
+                {
+                    mouseargs.Status = MouseRecognizerStatus.Exit;
+                    MouseListener?.Invoke(this, mouseargs);
+                }
                 if (tapping)
                 {
                     tapping = false;
@@ -87,6 +128,11 @@ public class GestureRecognizerView : View
                 p.Pressed = true;
                 pargs.Status = PointerRecognizerStatus.Press;
                 PointerGestureListener?.Invoke(this, pargs);
+                if (p.PointerType == PointerType.Mouse)
+                {
+                    mouseargs.Status = MouseRecognizerStatus.ButtonPressed;
+                    MouseListener?.Invoke(this, mouseargs);
+                }
                 if (tapping)
                 {
                     tapping = false;
@@ -104,6 +150,11 @@ public class GestureRecognizerView : View
                 p.Pressed = false;
                 pargs.Status = PointerRecognizerStatus.Release;
                 PointerGestureListener?.Invoke(this, pargs);
+                if (p.PointerType == PointerType.Mouse)
+                {
+                    mouseargs.Status = MouseRecognizerStatus.ButtonReleased;
+                    MouseListener?.Invoke(this, mouseargs);
+                }
                 if (tapping)
                 {
                     tapping = false;
@@ -117,7 +168,8 @@ public class GestureRecognizerView : View
                     {
                         panning = false;
                         PanGestureListener?.Invoke(this, CalculePanArgs(GestureRecognizerStatus.Complete));
-                    }else
+                    }
+                    else
                         PanGestureListener?.Invoke(this, CalculePanArgs(GestureRecognizerStatus.Running));
                 }
                 if (pinching)
@@ -126,7 +178,8 @@ public class GestureRecognizerView : View
                     {
                         pinching = false;
                         PinchGestureListener?.Invoke(this, CalculatePinchArgs(GestureRecognizerStatus.Complete));
-                    }else
+                    }
+                    else
                         PinchGestureListener?.Invoke(this, CalculatePinchArgs(GestureRecognizerStatus.Running));
                 }
                 ActivePointers.Remove(p);
@@ -134,10 +187,20 @@ public class GestureRecognizerView : View
             case GestureType.Move:
                 pargs.Status = PointerRecognizerStatus.Move;
                 PointerGestureListener?.Invoke(this, pargs);
+                if (p.PointerType == PointerType.Mouse)
+                {
+                    mouseargs.Status = MouseRecognizerStatus.Move;
+                    MouseListener?.Invoke(this, mouseargs);
+                }
                 if (tapping && (ActivePointers.Where(p => p.Pressed).Count() > 1 || (p.Pressed && p.StartPoint.Distance(p.EndPoint) > 5)))
                 {
                     tapping = false;
                     targs.Status = GestureRecognizerStatus.Cancel;
+                    TapGestureListener?.Invoke(this, targs);
+                }
+                else if (tapping)
+                {
+                    targs.Status = GestureRecognizerStatus.Running;
                     TapGestureListener?.Invoke(this, targs);
                 }
                 if (IsPanMovement())
@@ -158,6 +221,7 @@ public class GestureRecognizerView : View
                     else
                     {
                         pinching = true;
+                        totalRotation = 0;
                         PinchGestureListener?.Invoke(this, CalculatePinchArgs(GestureRecognizerStatus.Started));
                     }
                 }
@@ -182,6 +246,10 @@ public class GestureRecognizerView : View
                     PinchGestureListener?.Invoke(this, CalculatePinchArgs(GestureRecognizerStatus.Cancel));
                 }
                 ActivePointers.Remove(p);
+                break;
+            case GestureType.Wheel:
+                mouseargs.Status = MouseRecognizerStatus.WheelMoved;
+                MouseListener?.Invoke(this, mouseargs);
                 break;
         }
     }
@@ -210,10 +278,8 @@ public class GestureRecognizerView : View
         bool result = false;
         var pointers = ActivePointers.Where(p => p.Pressed).ToArray();
         if (pointers.Length > 1)
-        {
             result = Math.Abs(pointers[0].EndPoint.Distance(pointers[1].EndPoint) - pointers[0].PreviewsPoint.Distance(pointers[1].PreviewsPoint)) > 0;
-            Debug.WriteLine($"Pointers={pointers.Length} enddist={pointers[0].EndPoint.Distance(pointers[1].EndPoint)} prevdist={pointers[0].PreviewsPoint.Distance(pointers[1].PreviewsPoint)}");
-        }
+
         return result;
     }
     private PinchGestureEventArgs CalculatePinchArgs(GestureRecognizerStatus status)
@@ -224,12 +290,50 @@ public class GestureRecognizerView : View
         var startDistance = pointer1.StartPoint.Distance(pointer2.StartPoint);
         var previewsDistance = pointer1.PreviewsPoint.Distance(pointer2.PreviewsPoint);
         var endDistance = pointer1.EndPoint.Distance(pointer2.EndPoint);
+
+        Point v1 = new(pointer2.PreviewsPoint.X - pointer1.PreviewsPoint.X, pointer2.PreviewsPoint.Y - pointer1.PreviewsPoint.Y);
+        Point v2 = new(pointer2.EndPoint.X - pointer1.EndPoint.X, pointer2.EndPoint.Y - pointer1.EndPoint.Y);
+        var prodEscalar = v1.X * v2.X + v1.Y * v2.Y;
+        var modV1 = Math.Sqrt(v1.X * v1.X + v1.Y * v1.Y);
+        var modV2 = Math.Sqrt(v2.X * v2.X + v2.Y * v2.Y);
+        var angulo = Math.Acos(prodEscalar / (modV1 * modV2));
+        double dir;
+        if (pointer1.StartPoint.Y <= pointer2.StartPoint.Y)
+        {
+            if (pointer1.EndPoint.X > pointer1.PreviewsPoint.X)
+                dir = 1;
+            else if (pointer1.EndPoint.X < pointer1.PreviewsPoint.X)
+                dir = -1;
+            else if (pointer1.EndPoint.Y > pointer1.PreviewsPoint.Y)
+                dir = 1;
+            else
+                dir = -1;
+            if (pointer1.EndPoint.Y > pointer2.EndPoint.Y)
+                dir *= -1;
+        }
+        else
+        {
+            if (pointer2.EndPoint.X > pointer2.PreviewsPoint.X)
+                dir = 1;
+            else if (pointer2.EndPoint.X < pointer2.PreviewsPoint.X)
+                dir = -1;
+            else if (pointer2.EndPoint.Y > pointer2.PreviewsPoint.Y)
+                dir = 1;
+            else
+                dir = -1;
+            if (pointer2.EndPoint.Y > pointer1.EndPoint.Y)
+                dir *= -1;
+        }
+        angulo = (angulo * 180 / Math.PI) * dir;
+        totalRotation += angulo;
         PinchGestureEventArgs pargs = new()
         {
             Status = status,
             Pointers = ActivePointers,
             Scale = endDistance / startDistance,
-            ScaleIncrement = (endDistance / startDistance) - (previewsDistance / startDistance)
+            ScaleIncrement = (endDistance / startDistance) - (previewsDistance / startDistance),
+            Rotation = totalRotation,
+            RotationIncrement = angulo
         };
 
         return pargs;
@@ -271,12 +375,15 @@ public class GestureRecognizerView : View
                 p.EndPoint = pointer.StartPoint;
                 p.State1 = p.State2;
                 p.State2 = pointer.State1;
+                p.PreviewsPressure = p.EndPressure;
+                p.EndPressure = p.StartPressure;
             }
             else
             {
                 p = pointer;
                 p.EndTime = p.PreviewsTime = p.StartTime;
                 p.EndPoint = p.PreviewsPoint = p.StartPoint;
+                p.EndPressure = p.PreviewsPressure = p.StartPressure;
                 p.State2 = p.State1;
                 ActivePointers.Add(p);
             }
@@ -314,6 +421,7 @@ public class GestureRecognizerView : View
             else
             {
                 pinching = true;
+                totalRotation = 0;
                 PinchGestureListener?.Invoke(this, CalculatePinchArgs(GestureRecognizerStatus.Started));
             }
         }
@@ -327,6 +435,7 @@ public class GestureRecognizerView : View
         Enter,
         Exit,
         Cancel,
+        Wheel,
         None
     }
 }

@@ -21,18 +21,31 @@ internal class GestureRecognizerView : View
         float scale = Width / (float)mauiView.Width;
         var x = e.GetX(e.ActionIndex) / scale;
         var y = e.GetY(e.ActionIndex) / scale;
-        MotionEvent.PointerProperties properties=new MotionEvent.PointerProperties();
-        //e.GetToolType()
+        MotionEvent.PointerProperties properties = new();
         
         e.GetPointerProperties(e.ActionIndex, properties);
-        //properties.ToolType == MotionEventToolType
-        System.Diagnostics.Debug.WriteLine("Action=" + e.ActionMasked + " i=" + e.ActionIndex + " id=" + id + " x=" + x + " y=" + y);
         PointerInfo pointerInfo = new()
         {
             PointerId = id,
             StartTime = DateTime.Now,
-            StartPoint = new Point(x, y)
+            StartPoint = new Point(x, y),
+            StartPressure = e.Pressure,
+            PointerType = e.GetToolType(e.ActionIndex) switch
+            {
+                MotionEventToolType.Finger => PointerType.Touch,
+                MotionEventToolType.Stylus => PointerType.Pencil,
+                MotionEventToolType.Mouse => PointerType.Mouse,
+                _ => PointerType.Other
+            }
         };
+        if (pointerInfo.PointerType == PointerType.Mouse)
+        {
+            pointerInfo.MouseWheelDelta = 0;
+            pointerInfo.IsHorizontalMouseWheel = false;
+            pointerInfo.IsLeftButtonPressed = e.IsButtonPressed(MotionEventButtonState.Primary);
+            pointerInfo.IsRightButtonPressed = e.IsButtonPressed(MotionEventButtonState.Secondary);
+            pointerInfo.IsMiddleButtonPressed = e.IsButtonPressed(MotionEventButtonState.Tertiary);
+        }
         switch (e.ActionMasked)
         {
             case MotionEventActions.Down:
@@ -89,28 +102,22 @@ internal class GestureRecognizerView : View
                 pointerInfo.State1 = MauiView.GestureType.Cancel;
                 mauiView.UpdateGestures(pointerInfo);
                 break;
+            case MotionEventActions.Scroll:
+                if (pointerInfo.PointerType == PointerType.Mouse)
+                {
+                    float scroll = e.GetAxisValue(MotionEvent.AxisFromString("AXIS_VSCROLL"));
+                    if (scroll == 0)
+                    {
+                        scroll = e.GetAxisValue(MotionEvent.AxisFromString("AXIS_HSCROLL"));
+                        if (scroll != 0)
+                            pointerInfo.IsHorizontalMouseWheel = true;
+                    }
+                    pointerInfo.State1 = MauiView.GestureType.Wheel;
+                    pointerInfo.MouseWheelDelta = scroll;
+                    mauiView.UpdateGestures(pointerInfo);
+                }
+                break;
         }
-        
         return true;
-    }
-
-    private void GestureRecognizerView_Touch(object sender, TouchEventArgs e)
-    {
-        var id = e.Event.GetPointerId(e.Event.ActionIndex);
-        var x = e.Event.GetX(e.Event.ActionIndex);
-        var y = e.Event.GetY(e.Event.ActionIndex);
-
-        switch (e.Event.ActionMasked)
-        {
-            case MotionEventActions.Down:
-                System.Diagnostics.Debug.WriteLine("Action=" + e.Event.ActionMasked + " i=" + e.Event.ActionIndex + " id=" + id + " x=" + x + " y=" + y);
-                break;
-            case MotionEventActions.Move:
-                System.Diagnostics.Debug.WriteLine("Action=" + e.Event.ActionMasked + " i=" + e.Event.ActionIndex + " id=" + id + " x=" + x + " y=" + y);
-                break;
-            case MotionEventActions.Up:
-                System.Diagnostics.Debug.WriteLine("Action=" + e.Event.ActionMasked + " i=" + e.Event.ActionIndex + " id=" + id + " x=" + x + " y=" + y);
-                break;
-        }
     }
 }

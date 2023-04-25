@@ -15,5 +15,23 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Title>A View control for improve .net Maui gesturerecognizers</Title>
+		<Description>A view control that captures pointer events and translates them into gesture events. You can get all information about the pointers (location, pressure...)</Description>
+		<Authors>hjam40</Authors>
+		<PackageProjectUrl>https://github.com/hjam40/GestureRecognizerView.MAUI</PackageProjectUrl>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/hjam40/GestureRecognizerView.MAUI</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>csharp; dotnet; cross-platform; gestures; mouse; touch; plugin; maui; dotnet-maui;</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Include="..\Readme.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 </Project>

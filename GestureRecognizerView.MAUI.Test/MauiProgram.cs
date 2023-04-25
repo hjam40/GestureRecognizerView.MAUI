@@ -19,7 +19,6 @@ namespace GestureRecognizerView.MAUI.Test
 #if DEBUG
 		builder.Logging.AddDebug();
 #endif
-
             return builder.Build();
         }
     }

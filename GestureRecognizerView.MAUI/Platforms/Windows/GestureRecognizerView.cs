@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using MauiView = GestureRecognizerView.MAUI.GestureRecognizerView;
 using Color = Windows.UI.Color;
+using Microsoft.UI.Input;
 
 namespace GestureRecognizerView.MAUI.Windows;
 
@@ -27,8 +28,21 @@ public class GestureRecognizerView : Panel
     private void GestureRecognizerView_PointerWheelChanged(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
         var point = e.GetCurrentPoint(this);
-        //point.Properties.MouseWheelDelta;
-        
+        PointerInfo pointerInfo = new()
+        {
+            PointerId = point.PointerId,
+            StartTime = DateTime.Now,
+            StartPoint = new Point(point.Position.X, point.Position.Y),
+            State1 = MauiView.GestureType.Wheel,
+            PointerType = PointerType.Mouse,
+            StartPressure = point.Properties.Pressure,
+            MouseWheelDelta = point.Properties.MouseWheelDelta,
+            IsHorizontalMouseWheel = point.Properties.IsHorizontalMouseWheel,
+            IsLeftButtonPressed = point.Properties.IsLeftButtonPressed,
+            IsRightButtonPressed = point.Properties.IsRightButtonPressed,
+            IsMiddleButtonPressed = point.Properties.IsMiddleButtonPressed
+        };
+        mauiView.UpdateGestures(pointerInfo);
     }
 
     private void GestureRecognizerView_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
@@ -39,8 +53,25 @@ public class GestureRecognizerView : Panel
             PointerId = point.PointerId,
             StartTime = DateTime.Now,
             StartPoint = new Point(point.Position.X, point.Position.Y),
-            State1 = MauiView.GestureType.Enter
+            State1 = MauiView.GestureType.Enter,
+            StartPressure = point.Properties.Pressure,
+            PointerType = point.PointerDeviceType switch
+            {
+                PointerDeviceType.Touch => PointerType.Touch,
+                PointerDeviceType.Pen => PointerType.Pencil,
+                PointerDeviceType.Mouse => PointerType.Mouse,
+                PointerDeviceType.Touchpad => PointerType.Mouse,
+                _ => PointerType.Other
+            }
         };
+        if (pointerInfo.PointerType == PointerType.Mouse)
+        {
+            pointerInfo.MouseWheelDelta = 0;
+            pointerInfo.IsHorizontalMouseWheel = false;
+            pointerInfo.IsLeftButtonPressed = point.Properties.IsLeftButtonPressed;
+            pointerInfo.IsRightButtonPressed = point.Properties.IsRightButtonPressed;
+            pointerInfo.IsMiddleButtonPressed = point.Properties.IsMiddleButtonPressed;
+        }
         mauiView.UpdateGestures(pointerInfo);
     }
 
@@ -52,8 +83,25 @@ public class GestureRecognizerView : Panel
             PointerId = point.PointerId,
             StartTime = DateTime.Now,
             StartPoint = new Point(point.Position.X, point.Position.Y),
-            State1 = MauiView.GestureType.Exit
+            State1 = MauiView.GestureType.Exit,
+            StartPressure = point.Properties.Pressure,
+            PointerType = point.PointerDeviceType switch
+            {
+                PointerDeviceType.Touch => PointerType.Touch,
+                PointerDeviceType.Pen => PointerType.Pencil,
+                PointerDeviceType.Mouse => PointerType.Mouse,
+                PointerDeviceType.Touchpad => PointerType.Mouse,
+                _ => PointerType.Other
+            }
         };
+        if (pointerInfo.PointerType == PointerType.Mouse)
+        {
+            pointerInfo.MouseWheelDelta = 0;
+            pointerInfo.IsHorizontalMouseWheel = false;
+            pointerInfo.IsLeftButtonPressed = point.Properties.IsLeftButtonPressed;
+            pointerInfo.IsRightButtonPressed = point.Properties.IsRightButtonPressed;
+            pointerInfo.IsMiddleButtonPressed = point.Properties.IsMiddleButtonPressed;
+        }
         mauiView.UpdateGestures(pointerInfo);
     }
 
@@ -65,8 +113,25 @@ public class GestureRecognizerView : Panel
             PointerId = point.PointerId,
             StartTime = DateTime.Now,
             StartPoint = new Point(point.Position.X, point.Position.Y),
-            State1 = MauiView.GestureType.Cancel
+            State1 = MauiView.GestureType.Cancel,
+            StartPressure = point.Properties.Pressure,
+            PointerType = point.PointerDeviceType switch
+            {
+                PointerDeviceType.Touch => PointerType.Touch,
+                PointerDeviceType.Pen => PointerType.Pencil,
+                PointerDeviceType.Mouse => PointerType.Mouse,
+                PointerDeviceType.Touchpad => PointerType.Mouse,
+                _ => PointerType.Other
+            }
         };
+        if (pointerInfo.PointerType == PointerType.Mouse)
+        {
+            pointerInfo.MouseWheelDelta = 0;
+            pointerInfo.IsHorizontalMouseWheel = false;
+            pointerInfo.IsLeftButtonPressed = point.Properties.IsLeftButtonPressed;
+            pointerInfo.IsRightButtonPressed = point.Properties.IsRightButtonPressed;
+            pointerInfo.IsMiddleButtonPressed = point.Properties.IsMiddleButtonPressed;
+        }
         mauiView.UpdateGestures(pointerInfo);
     }
 
@@ -78,8 +143,25 @@ public class GestureRecognizerView : Panel
             PointerId = point.PointerId,
             StartTime = DateTime.Now,
             StartPoint = new Point(point.Position.X, point.Position.Y),
-            State1 = MauiView.GestureType.Move
+            State1 = MauiView.GestureType.Move,
+            StartPressure = point.Properties.Pressure,
+            PointerType = point.PointerDeviceType switch
+            {
+                PointerDeviceType.Touch => PointerType.Touch,
+                PointerDeviceType.Pen => PointerType.Pencil,
+                PointerDeviceType.Mouse => PointerType.Mouse,
+                PointerDeviceType.Touchpad => PointerType.Mouse,
+                _ => PointerType.Other
+            }
         };
+        if (pointerInfo.PointerType == PointerType.Mouse)
+        {
+            pointerInfo.MouseWheelDelta = 0;
+            pointerInfo.IsHorizontalMouseWheel = false;
+            pointerInfo.IsLeftButtonPressed = point.Properties.IsLeftButtonPressed;
+            pointerInfo.IsRightButtonPressed = point.Properties.IsRightButtonPressed;
+            pointerInfo.IsMiddleButtonPressed = point.Properties.IsMiddleButtonPressed;
+        }
         mauiView.UpdateGestures(pointerInfo);
     }
 
@@ -92,8 +174,25 @@ public class GestureRecognizerView : Panel
             StartTime = DateTime.Now,
             StartPoint = new Point(point.Position.X, point.Position.Y),
             State1 = MauiView.GestureType.Release,
-            Pressed = false
+            StartPressure = point.Properties.Pressure,
+            Pressed = false,
+            PointerType = point.PointerDeviceType switch
+            {
+                PointerDeviceType.Touch => PointerType.Touch,
+                PointerDeviceType.Pen => PointerType.Pencil,
+                PointerDeviceType.Mouse => PointerType.Mouse,
+                PointerDeviceType.Touchpad => PointerType.Mouse,
+                _ => PointerType.Other
+            }
         };
+        if (pointerInfo.PointerType == PointerType.Mouse)
+        {
+            pointerInfo.MouseWheelDelta = 0;
+            pointerInfo.IsHorizontalMouseWheel = false;
+            pointerInfo.IsLeftButtonPressed = point.Properties.IsLeftButtonPressed;
+            pointerInfo.IsRightButtonPressed = point.Properties.IsRightButtonPressed;
+            pointerInfo.IsMiddleButtonPressed = point.Properties.IsMiddleButtonPressed;
+        }
         mauiView.UpdateGestures(pointerInfo);
     }
 
@@ -106,8 +205,25 @@ public class GestureRecognizerView : Panel
             StartTime = DateTime.Now,
             StartPoint = new Point(point.Position.X, point.Position.Y),
             State1 = MauiView.GestureType.Press,
-            Pressed = true
+            StartPressure = point.Properties.Pressure,
+            Pressed = true,
+            PointerType = point.PointerDeviceType switch
+            {
+                PointerDeviceType.Touch => PointerType.Touch,
+                PointerDeviceType.Pen => PointerType.Pencil,
+                PointerDeviceType.Mouse => PointerType.Mouse,
+                PointerDeviceType.Touchpad => PointerType.Mouse,
+                _ => PointerType.Other
+            }
         };
+        if (pointerInfo.PointerType == PointerType.Mouse)
+        {
+            pointerInfo.MouseWheelDelta = 0;
+            pointerInfo.IsHorizontalMouseWheel = false;
+            pointerInfo.IsLeftButtonPressed = point.Properties.IsLeftButtonPressed;
+            pointerInfo.IsRightButtonPressed = point.Properties.IsRightButtonPressed;
+            pointerInfo.IsMiddleButtonPressed = point.Properties.IsMiddleButtonPressed;
+        }
         mauiView.UpdateGestures(pointerInfo);
     }
 }
